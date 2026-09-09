@@ -2,7 +2,7 @@
 foldr.cli
 ~~~~~~~~~
 FOLDR v0.2.1 — Smart File Organizer
-by Muhammad Qasim · github.com/qasimio/Foldr
+by Qasim Sethar · github.com/foldrhq/Foldr
 
 Commands
 --------
@@ -123,7 +123,7 @@ def _banner() -> None:
     print(f"   {d}╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝{r}")
 
     print(f"\n   {m}Fast, Safe folder cleanup with Preview and Undo · v{VERSION}{r}")
-    print(f"   {m}@qasimio · github.com/qasimio/Foldr{r}\n")
+    print(f"   {m}@qasimio · github.com/foldrhq/Foldr{r}\n")
     print()
 
 def _box(body: str, title: str = "", col: str = "") -> None:

@@ -5,7 +5,7 @@ Thank you for your interest in contributing!
 ## Getting Started
 
 ```bash
-git clone https://github.com/qasimio/Foldr.git
+git clone https://github.com/foldrhq/Foldr.git
 cd Foldr
 python -m venv .venv
 source .venv/bin/activate      # Linux / macOS
@@ -13,11 +13,6 @@ source .venv/bin/activate      # Linux / macOS
 pip install -e ".[dev]"
 ```
 
-## Running Tests
-
-```bash
-python -m pytest tests/ -v
-```
 
 ## Code Style
 
@@ -28,7 +23,7 @@ python -m pytest tests/ -v
 
 ## Reporting Bugs
 
-Open an issue at [github.com/qasimio/Foldr/issues](https://github.com/qasimio/Foldr/issues) with:
+Open an issue at [github.com/foldrhq/Foldr/issues](https://github.com/foldrhq/Foldr/issues) with:
 
 1. Your OS and Python version (`python --version`)
 2. FOLDR version (`pip show foldr`)
