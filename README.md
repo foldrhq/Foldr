@@ -6,7 +6,7 @@
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/foldr?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/foldr)
 [![Documentation](https://img.shields.io/badge/docs-online-blue?logo=gitbook)](https://docs.qasimio.me/docs/foldr/start-here)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](#)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qasimio/Foldr)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/foldrhq/Foldr)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 
@@ -154,8 +154,8 @@ LinkedIn: [linkedin.com/in/qasimio](https://www.linkedin.com/in/qasimio/)
 
 <a href="https://www.star-history.com/?repos=qasimio%2FFOLDR&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=qasimio/FOLDR&type=date&theme=dark&legend=top-left&sealed_token=nRvWhSFeLGr0geFLPrNTsGQ4Z-SGfTeO5_g56Vm1QCMzt33eD8o-BTaTJU12u3HJSN-7Rr-7mPjy5dCL0n5zCDaLw2BxUjcU_oIjtUO8M1fKPiKWD4BsvA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=qasimio/FOLDR&type=date&legend=top-left&sealed_token=nRvWhSFeLGr0geFLPrNTsGQ4Z-SGfTeO5_g56Vm1QCMzt33eD8o-BTaTJU12u3HJSN-7Rr-7mPjy5dCL0n5zCDaLw2BxUjcU_oIjtUO8M1fKPiKWD4BsvA" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=qasimio/FOLDR&type=date&legend=top-left&sealed_token=nRvWhSFeLGr0geFLPrNTsGQ4Z-SGfTeO5_g56Vm1QCMzt33eD8o-BTaTJU12u3HJSN-7Rr-7mPjy5dCL0n5zCDaLw2BxUjcU_oIjtUO8M1fKPiKWD4BsvA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=foldrhq/Foldr&type=date&theme=dark&legend=top-left&sealed_token=nRvWhSFeLGr0geFLPrNTsGQ4Z-SGfTeO5_g56Vm1QCMzt33eD8o-BTaTJU12u3HJSN-7Rr-7mPjy5dCL0n5zCDaLw2BxUjcU_oIjtUO8M1fKPiKWD4BsvA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=foldrhq/Foldr&type=date&legend=top-left&sealed_token=nRvWhSFeLGr0geFLPrNTsGQ4Z-SGfTeO5_g56Vm1QCMzt33eD8o-BTaTJU12u3HJSN-7Rr-7mPjy5dCL0n5zCDaLw2BxUjcU_oIjtUO8M1fKPiKWD4BsvA" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=foldrhq/Foldr&type=date&legend=top-left&sealed_token=nRvWhSFeLGr0geFLPrNTsGQ4Z-SGfTeO5_g56Vm1QCMzt33eD8o-BTaTJU12u3HJSN-7Rr-7mPjy5dCL0n5zCDaLw2BxUjcU_oIjtUO8M1fKPiKWD4BsvA" />
  </picture>
 </a>

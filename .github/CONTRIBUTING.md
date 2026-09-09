@@ -23,7 +23,7 @@ pip install -e ".[dev]"
 
 ## Reporting Bugs
 
-Open an issue at [github.com/foldrhq/Foldr/issues](https://github.com/qasimio/Foldr/issues) with:
+Open an issue at [github.com/foldrhq/Foldr/issues](https://github.com/foldrhq/Foldr/issues) with:
 
 1. Your OS and Python version (`python --version`)
 2. FOLDR version (`pip show foldr`)
