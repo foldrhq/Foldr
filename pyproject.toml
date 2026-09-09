@@ -9,7 +9,7 @@ description     = "Clean folders instantly with preview and full undo — fast, 
 readme          = "README.md"
 license         = { text = "MIT" }
 requires-python = ">=3.10"
-authors         = [{ name = "Muhammad Qasim", email = "amkassim444@gmail.com" }]
+authors         = [{ name = "Qasim Sethar", email = "foldr@qasimio.me" }]
 keywords        = ["files", "organizer", "cli", "productivity", "automation"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -40,9 +40,9 @@ dependencies = [
 foldr = "foldr.cli:main"
 
 [project.urls]
-Homepage   = "https://github.com/qasimio/Foldr"
-Repository = "https://github.com/qasimio/Foldr"
-Issues     = "https://github.com/qasimio/Foldr/issues"
+Homepage   = "https://github.com/foldrhq/Foldr"
+Repository = "https://github.com/foldrhq/Foldr"
+Issues     = "https://github.com/foldrhq/Foldr/issues"
 
 [tool.setuptools.packages.find]
 where   = ["."]

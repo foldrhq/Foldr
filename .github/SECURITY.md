@@ -11,7 +11,7 @@
 
 If you discover a security vulnerability in FOLDR, please **do not** open a public issue.
 
-Instead, report it privately by emailing: **amkassim444@gmail.com**
+Instead, report it privately by emailing: **foldr@qasimio.me**
 
 Please include:
 - A description of the vulnerability

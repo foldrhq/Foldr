@@ -1,6 +1,6 @@
 # FOLDR — Complete Functionality Guide
 
-**Author:** Muhammad Qasim | **GitHub:** github.com/qasimio/Foldr | **Version:** 2.1
+**Author:**  Qasim Sethar | **GitHub:** github.com/foldrhq/Foldr | **Version:** 2.1
 
 ---
 
