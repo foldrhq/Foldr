@@ -121,7 +121,7 @@ Looking for detailed guides, advanced usage, and examples?
 If you've found a security vulnerability, please don't open a public issue.
 
 Report it privately at:
-**security@qasimio.me**
+**foldr@qasimio.me**
 
 ---
 
