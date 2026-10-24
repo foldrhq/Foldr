@@ -10,11 +10,11 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 
-**You will never Oganize your files manually.**
+**You will never Organize your files manually.**
 
 <p align="center">
   
-**7,000+ installs •  75+ GitHub stars • Used daily by students & developers**
+**7,777+ installs •  90+ GitHub stars • Used daily by students & developers**
 
 </p>
 
@@ -121,7 +121,7 @@ Looking for detailed guides, advanced usage, and examples?
 If you've found a security vulnerability, please don't open a public issue.
 
 Report it privately at:
-**security@qasimio.me**
+**foldr@qasimio.me**
 
 ---
 
