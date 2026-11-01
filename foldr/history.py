@@ -223,8 +223,6 @@ class UndoResult:
         self.op_type:     str  = "organize"
 
 
-# ── Undo ──────────────────────────────────────────────────────────────────────
-
 def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
     """
     Reverse an operation.
@@ -239,10 +237,10 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
     the expected destination (moved elsewhere by a later op), it is
     SKIPPED with a clear message — never blindly moved.
     """
-    result          = UndoResult()
-    op_type         = log_data.get("op_type", "organize")
-    result.op_type  = op_type
-    records         = log_data.get("records", [])
+    result             = UndoResult()
+    op_type            = log_data.get("op_type", "organize")
+    result.op_type     = op_type
+    records            = log_data.get("records", [])
 
     # Dedup undo: files were deleted, cannot restore
     if op_type == "dedup":
@@ -252,10 +250,16 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
             )
         return result
 
+    # Keep track of destination directories to clean up empty ones later
+    affected_dirs = set()
+
     # Organize / undo-of-undo: move files back
     for record in reversed(records):
         dest = Path(record["destination"])
         src  = Path(record["source"])
+
+        # Track the parent directory of the destination
+        affected_dirs.add(dest.parent)
 
         # File not at expected destination
         if not dest.exists():
@@ -288,6 +292,16 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
             )
         except OSError as e:
             result.errors.append(f"{record['filename']}: {e}")
+
+    # Clean up empty folders left behind after undo
+    if not dry_run:
+        # Sort by path length descending (deepest folders first) so nested empty folders delete correctly
+        for folder in sorted(affected_dirs, key=lambda p: len(p.parts), reverse=True):
+            try:
+                if folder.exists() and folder.is_dir() and not any(folder.iterdir()):
+                    folder.rmdir()
+            except OSError:
+                pass
 
     # Archive the log (move to .foldr/history/archive/ instead of deleting)
     # so the user can still see it in history --all
