@@ -76,11 +76,11 @@ def save_history(
     if dry_run or not records:
         return None
 
-    d       = _ensure()
-    now     = datetime.now(timezone.utc)
-    eid     = uuid.uuid4().hex[:8]
-    fname   = now.strftime("%Y-%m-%d_%H-%M-%S") + f"_{eid}.json"
-    path    = d / fname
+    d        = _ensure()
+    now      = datetime.now(timezone.utc)
+    eid      = uuid.uuid4().hex[:8]
+    fname    = now.strftime("%Y-%m-%d_%H-%M-%S") + f"_{eid}.json"
+    path     = d / fname
 
     payload: dict = {
         "id":          eid,
@@ -304,7 +304,6 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
                 pass
 
     # Archive the log (move to .foldr/history/archive/ instead of deleting)
-    # so the user can still see it in history --all
     if not dry_run and not result.errors:
         log_path = log_data.get("path")
         if log_path:
