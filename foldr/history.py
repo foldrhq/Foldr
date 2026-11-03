@@ -250,16 +250,22 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
             )
         return result
 
-    # Keep track of destination directories to clean up empty ones later
-    affected_dirs = set()
+    # Only directories recorded during organization are eligible for cleanup.
+    # Older history entries without this metadata are left untouched.
+    recorded_dirs = log_data.get("created_directories", [])
+    foldr_created_dirs = {
+        Path(directory)
+        for directory in recorded_dirs
+        if isinstance(directory, str) and directory
+    } if isinstance(recorded_dirs, list) else set()
+
+    # A directory is eligible only after a file from it was successfully restored.
+    restored_dirs = set()
 
     # Organize / undo-of-undo: move files back
     for record in reversed(records):
         dest = Path(record["destination"])
         src  = Path(record["source"])
-
-        # Track the parent directory of the destination
-        affected_dirs.add(dest.parent)
 
         # File not at expected destination
         if not dest.exists():
@@ -290,15 +296,32 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
             result.restored.append(
                 f"{record['filename']}  {dest.parent.name}/ → {target.parent.name}/"
             )
+            restored_dirs.add(dest.parent)
         except OSError as e:
             result.errors.append(f"{record['filename']}: {e}")
 
-    # Clean up empty folders left behind after undo
+    # Clean up only FOLDR-created directories involved in successful restorations.
     if not dry_run:
-        # Sort by path length descending (deepest folders first) so nested empty folders delete correctly
-        for folder in sorted(affected_dirs, key=lambda p: len(p.parts), reverse=True):
+        cleanup_dirs = {
+            folder
+            for folder in foldr_created_dirs
+            if any(
+                folder == restored_dir or folder in restored_dir.parents
+                for restored_dir in restored_dirs
+            )
+        }
+
+        for folder in sorted(
+            cleanup_dirs,
+            key=lambda p: len(p.parts),
+            reverse=True,
+        ):
             try:
-                if folder.exists() and folder.is_dir() and not any(folder.iterdir()):
+                if (
+                    not folder.is_symlink()
+                    and folder.is_dir()
+                    and not any(folder.iterdir())
+                ):
                     folder.rmdir()
             except OSError:
                 pass
