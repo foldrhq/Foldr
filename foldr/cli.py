@@ -724,8 +724,14 @@ def cmd_organize(target: Path, args: argparse.Namespace, template: dict|None) ->
                   f"{_c(FG_BRIGHT)}{truncate(r.filename,40):<40}{rst}  "
                   f"{_c(FG_MUTED)}->{rst}  {col}{dest}/{rst}")
 
-    log_path = save_history(result.records, target, dry_run=False)
-    if log_path and verbose: _dim(f"History: {log_path.name}")
+    log_path = save_history(
+        result.records, 
+        target, 
+        dry_run=False, 
+        extra={"created_directories": result.created_directories}
+    )
+    if log_path and verbose:
+        _dim(f"History: {log_path.name}")
 
     _print_summary(
         {k:v for k,v in result.categories.items() if v},
@@ -740,8 +746,6 @@ def cmd_organize(target: Path, args: argparse.Namespace, template: dict|None) ->
         if _confirm(f"Remove {n_empty} empty directories?", default=False):
             removed = remove_empty_dirs(scan.found)
             _ok(f"Removed {len(removed.removed)} empty directories.")
-
-
 # ── main ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
