@@ -76,11 +76,11 @@ def save_history(
     if dry_run or not records:
         return None
 
-    d       = _ensure()
-    now     = datetime.now(timezone.utc)
-    eid     = uuid.uuid4().hex[:8]
-    fname   = now.strftime("%Y-%m-%d_%H-%M-%S") + f"_{eid}.json"
-    path    = d / fname
+    d        = _ensure()
+    now      = datetime.now(timezone.utc)
+    eid      = uuid.uuid4().hex[:8]
+    fname    = now.strftime("%Y-%m-%d_%H-%M-%S") + f"_{eid}.json"
+    path     = d / fname
 
     payload: dict = {
         "id":          eid,
@@ -223,8 +223,6 @@ class UndoResult:
         self.op_type:     str  = "organize"
 
 
-# ── Undo ──────────────────────────────────────────────────────────────────────
-
 def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
     """
     Reverse an operation.
@@ -239,10 +237,10 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
     the expected destination (moved elsewhere by a later op), it is
     SKIPPED with a clear message — never blindly moved.
     """
-    result          = UndoResult()
-    op_type         = log_data.get("op_type", "organize")
-    result.op_type  = op_type
-    records         = log_data.get("records", [])
+    result             = UndoResult()
+    op_type            = log_data.get("op_type", "organize")
+    result.op_type     = op_type
+    records            = log_data.get("records", [])
 
     # Dedup undo: files were deleted, cannot restore
     if op_type == "dedup":
@@ -251,6 +249,18 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
                 f"{r['filename']} — permanently deleted by dedup, cannot restore"
             )
         return result
+
+    # Only directories recorded during organization are eligible for cleanup.
+    # Older history entries without this metadata are left untouched.
+    recorded_dirs = log_data.get("created_directories", [])
+    foldr_created_dirs = {
+        Path(directory)
+        for directory in recorded_dirs
+        if isinstance(directory, str) and directory
+    } if isinstance(recorded_dirs, list) else set()
+
+    # A directory is eligible only after a file from it was successfully restored.
+    restored_dirs = set()
 
     # Organize / undo-of-undo: move files back
     for record in reversed(records):
@@ -286,11 +296,37 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
             result.restored.append(
                 f"{record['filename']}  {dest.parent.name}/ → {target.parent.name}/"
             )
+            restored_dirs.add(dest.parent)
         except OSError as e:
             result.errors.append(f"{record['filename']}: {e}")
 
+    # Clean up only FOLDR-created directories involved in successful restorations.
+    if not dry_run:
+        cleanup_dirs = {
+            folder
+            for folder in foldr_created_dirs
+            if any(
+                folder == restored_dir or folder in restored_dir.parents
+                for restored_dir in restored_dirs
+            )
+        }
+
+        for folder in sorted(
+            cleanup_dirs,
+            key=lambda p: len(p.parts),
+            reverse=True,
+        ):
+            try:
+                if (
+                    not folder.is_symlink()
+                    and folder.is_dir()
+                    and not any(folder.iterdir())
+                ):
+                    folder.rmdir()
+            except OSError:
+                pass
+
     # Archive the log (move to .foldr/history/archive/ instead of deleting)
-    # so the user can still see it in history --all
     if not dry_run and not result.errors:
         log_path = log_data.get("path")
         if log_path:
