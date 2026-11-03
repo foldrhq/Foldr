@@ -222,27 +222,19 @@ class UndoResult:
         self.log_deleted: bool = False
         self.op_type:     str  = "organize"
 
-
 def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
     """
-    Reverse an operation.
-
-    For 'organize': move files back from destination → source.
-    For 'dedup':    files were deleted — cannot restore, warn user.
-    For 'undo':     reverse the undo (re-apply the original operation).
-
-    Safe behaviour
-    ---------------
-    Each file is checked independently. If the file is no longer at
-    the expected destination (moved elsewhere by a later op), it is
-    SKIPPED with a clear message — never blindly moved.
+    Reverse an operation safely based on PR #31 requirements:
+    1. Only clean up directories that FOLDR created ('created_directories').
+    2. Only clean up directories where at least one file was SUCCESSFULLY restored.
+    3. Older history entries without 'created_directories' will NOT remove directories.
+    4. Process deepest-to-shallowest empty directories safely without recursive deletes.
     """
-    result             = UndoResult()
-    op_type            = log_data.get("op_type", "organize")
-    result.op_type     = op_type
-    records            = log_data.get("records", [])
+    result         = UndoResult()
+    op_type        = log_data.get("op_type", "organize")
+    result.op_type = op_type
+    records        = log_data.get("records", [])
 
-    # Dedup undo: files were deleted, cannot restore
     if op_type == "dedup":
         for r in records:
             result.skipped.append(
@@ -250,18 +242,18 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
             )
         return result
 
-    # Keep track of destination directories to clean up empty ones later
-    affected_dirs = set()
+    # FOLDR specifically created these folders during organize
+    foldr_created_dirs = set(
+        Path(d) for d in log_data.get("created_directories", [])
+    )
 
-    # Organize / undo-of-undo: move files back
+    # Track directories that received at least one successfully restored file
+    restored_dirs = set()
+
     for record in reversed(records):
         dest = Path(record["destination"])
         src  = Path(record["source"])
 
-        # Track the parent directory of the destination
-        affected_dirs.add(dest.parent)
-
-        # File not at expected destination
         if not dest.exists():
             result.skipped.append(
                 f"{record['filename']} — not found at {dest.parent.name}/"
@@ -278,7 +270,7 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
         try:
             src.parent.mkdir(parents=True, exist_ok=True)
             target = src
-            # Conflict resolution: don't overwrite existing file
+
             if target.exists():
                 stem = src.stem
                 suf  = src.suffix
@@ -286,24 +278,36 @@ def undo_operation(log_data: dict, dry_run: bool = False) -> UndoResult:
                 while target.exists():
                     target = src.parent / f"{stem}_restored({n}){suf}"
                     n += 1
+
             shutil.move(str(dest), str(target))
             result.restored.append(
                 f"{record['filename']}  {dest.parent.name}/ → {target.parent.name}/"
             )
+            
+            # Record directory as eligible for cleanup after a successful file move
+            restored_dirs.add(dest.parent)
+
         except OSError as e:
             result.errors.append(f"{record['filename']}: {e}")
 
-    # Clean up empty folders left behind after undo
-    if not dry_run:
-        # Sort by path length descending (deepest folders first) so nested empty folders delete correctly
-        for folder in sorted(affected_dirs, key=lambda p: len(p.parts), reverse=True):
+    # Safe cleanup logic for dry_run=False
+    if not dry_run and foldr_created_dirs:
+        # Candidate dirs must be created by FOLDR AND have had files restored from them
+        candidate_dirs = foldr_created_dirs.intersection(restored_dirs)
+
+        # Sort deepest to shallowest
+        sorted_candidates = sorted(
+            candidate_dirs, key=lambda p: len(p.parts), reverse=True
+        )
+
+        for folder in sorted_candidates:
             try:
+                # Remove ONLY if directory exists, is a folder, and is completely empty
                 if folder.exists() and folder.is_dir() and not any(folder.iterdir()):
                     folder.rmdir()
             except OSError:
                 pass
 
-    # Archive the log (move to .foldr/history/archive/ instead of deleting)
     if not dry_run and not result.errors:
         log_path = log_data.get("path")
         if log_path:

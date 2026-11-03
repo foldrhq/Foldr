@@ -10,6 +10,8 @@ Design rules
   to the root's Documents/, Code/, etc.  This prevents the
   lol/Code/Code/… nesting bug.
 - Every file move is recorded in an OperationRecord for undo support.
+- Track directory creation ownership: only directories created by FOLDR
+  during organisation are recorded in created_directories and eligible for cleanup.
 - Ignore rules (from .foldrignore or --ignore patterns) are evaluated
   before any file is touched.
 """
@@ -49,6 +51,7 @@ class OrganizeResult:
     categories: dict[str, int] = field(default_factory=dict)
     actions: list[str] = field(default_factory=list)
     records: list[OperationRecord] = field(default_factory=list)
+    created_directories: list[str] = field(default_factory=list)
     dry_run: bool = False
     recursive: bool = False
     dirs_processed: int = 1
@@ -134,9 +137,10 @@ def _move_file(
     category: str,
     dry_run: bool,
     result: OrganizeResult,
+    created_dirs_set: set[Path],
     rel_prefix: str = "",
 ) -> None:
-    """Move source → destination, resolving name conflicts. Records the op."""
+    """Move source → destination, resolving name conflicts. Records the op and tracked created dirs."""
     target = destination / source.name
 
     if target.exists():
@@ -165,8 +169,10 @@ def _move_file(
     result.records.append(record)
 
     if not dry_run:
+        # Track if FOLDR creates this directory during the operation
         if not destination.exists():
             destination.mkdir(parents=True, exist_ok=True)
+            created_dirs_set.add(destination)
         shutil.move(str(source), str(target))
 
 
@@ -197,6 +203,7 @@ def _organize_dir(
     ignore_patterns: list[str],
     root_base: Path,
     result: OrganizeResult,
+    created_dirs_set: set[Path],
 ) -> None:
     """
     Organise files directly inside `directory`.
@@ -246,6 +253,7 @@ def _organize_dir(
                     category=cat_name,
                     dry_run=dry_run,
                     result=result,
+                    created_dirs_set=created_dirs_set,
                     rel_prefix=rel_prefix,
                 )
                 moved = True
@@ -364,8 +372,8 @@ def organize_folder(
     root_categories = _build_categories(base, template)
     root_dest_folders = _dest_folders(root_categories)
 
-    # Create destination dirs upfront (only in real mode)
-    # We defer mkdir to _move_file so empty dirs are never pre-created.
+    # Track folders specifically created by FOLDR during this operation
+    created_dirs_set: set[Path] = set()
 
     # Ignore patterns: local .foldrignore + global + CLI overrides
     ignore_patterns = _load_foldrignore(base)
@@ -391,6 +399,7 @@ def organize_folder(
         ignore_patterns=ignore_patterns,
         root_base=base,
         result=result,
+        created_dirs_set=created_dirs_set,
     )
     result.dirs_processed = 1
 
@@ -413,15 +422,19 @@ def organize_folder(
                 ignore_patterns=ignore_patterns,
                 root_base=base,
                 result=result,
+                created_dirs_set=created_dirs_set,
             )
             result.dirs_processed += 1
+
+    # Store created directory strings for history log
+    result.created_directories = [str(d) for d in created_dirs_set]
 
     # Update category counts from root_categories (mutated during moves)
     result.categories = {name: cat["count"] for name, cat in root_categories.items()}
 
-    # Clean up empty destination folders
+    # Safe cleanup: ONLY remove empty destination folders THAT WERE CREATED BY FOLDR
     if not dry_run:
-        for folder in root_dest_folders:
+        for folder in created_dirs_set:
             if folder.exists() and folder.is_dir():
                 try:
                     if not any(folder.iterdir()):
